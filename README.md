@@ -1,3 +1,11 @@
+ألف مبروك يا هندسة\! 🚀
+بما أن الـ Merge تم بنجاح والصورة ظهرت في قائمة الملفات، أنت الآن جاهز للخطوة الأخيرة.
+
+لقد قمت بتحديث كود الـ **README.md** بالكامل ليتوافق مع **مسارات الصور الموجودة في الـ Root** (بدون كلمة `assets/`) ومع اسم ملف الـ Schema (بنفس الـ Spelling الموجود عندك).
+
+انسخ الكود التالي بالكامل وضعه في ملف `README.md` واحفظه، ثم ارفعه:
+
+````markdown
 # 🚦 SafeRoute: End-to-End US Traffic Accidents Data Pipeline
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge&logo=python)
@@ -15,7 +23,7 @@
 
 The pipeline follows the **Medallion Architecture** (Bronze, Silver, Gold) to ensure data quality and scalability.
 
-![Pipeline Architecture](assets/Data_flow_3.png)
+![Pipeline Architecture](Data_flow_3.png)
 
 ### 🔄 Data Flow (Interactive Map)
 
@@ -40,3 +48,108 @@ graph LR
 
     classDef tool fill:#f9f,stroke:#333,stroke-width:2px;
     class Airbyte,dbt,Dagster,PBI tool;
+````
+
+-----
+
+## 🛠️ Tech Stack & Implementation Details
+
+| Component | Tool | Description |
+| :--- | :--- | :--- |
+| **Data Lake** | **AWS S3** | Stores raw CSV data (partitioned/stored securely). |
+| **Ingestion** | **Airbyte Cloud** | Automates data loading from S3 to Snowflake (Bronze Layer). |
+| **Warehouse** | **Snowflake** | Cloud DWH hosting the Medallion Architecture layers. |
+| **Transformation** | **dbt Core** | Performs data cleaning, testing, and modeling (Junk Dimensions, Surrogate Keys). |
+| **Orchestration** | **Dagster** | Manages dependencies, assets, and creates a sensor-based trigger for pipeline failure (Gmail SMTP). |
+| **Visualization** | **Power BI** | Interactive dashboard for geospatial and trend analysis. |
+
+-----
+
+## 📊 Data Modeling (Star Schema)
+
+We designed a highly optimized **Star Schema** to facilitate high-performance analytics on the 7M+ records.
+
+**Key Design Decisions:**
+
+  * **Junk Dimension (`DIM_ROAD_CONFIG`):** Combined 13 boolean flags (bump, crossing, signal, etc.) into unique configuration keys to reduce Fact Table width.
+  * **Geospatial Data:** Utilized Snowflake's `GEOGRAPHY` data type for precise location analytics.
+  * **Surrogate Keys:** Generated MD5 hashes for dimension integrity.
+
+-----
+
+## 🚨 Orchestration & Monitoring
+
+We implemented **Dagster Sensors** to monitor pipeline health in real-time. If any asset fails (e.g., dbt test failure or Airbyte sync error), an automated email alert is triggered immediately via SMTP.
+
+*\> Proof of the automated failure alert system delivering real-time notifications.*
+
+-----
+
+## 📈 Analytics & Dashboard
+
+The final output is a suite of Power BI dashboards used to identify accident hotspots, weather correlations, and road infrastructure impacts.
+
+### 1\. General Overview
+
+*High-level metrics covering total accidents, severity distribution, and temporal trends.*
+
+### 2\. Weather Impact Analysis
+
+*Correlating visibility, wind speed, and precipitation with accident frequency.*
+
+### 3\. Road Infrastructure Statistics
+
+*Analyzing the impact of road features (junctions, signals) on accident rates.*
+
+-----
+
+## 💻 How to Run Locally
+
+### Prerequisites
+
+  * Python 3.9+
+  * Snowflake Account
+  * dbt CLI installed
+
+### Steps
+
+1.  **Clone the Repo**
+
+    ```bash
+    git clone [https://github.com/amramgad8/SafeRoute-Data-Pipeline.git](https://github.com/amramgad8/SafeRoute-Data-Pipeline.git)
+    cd SafeRoute-Data-Pipeline
+    ```
+
+2.  **Install Dependencies**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Setup dbt Profile**
+    Configure your `profiles.yml` to connect to your Snowflake account.
+
+4.  **Run the Pipeline (Dagster UI)**
+
+    ```bash
+    dagster dev
+    ```
+
+    Navigate to `localhost:3000` to visualize and launch the pipeline.
+
+-----
+
+## 👥 Team (SIC 7 - Group 11)
+
+  * **Amr Amgad** - Data Engineering & Cloud Infrastructure
+  * **Mark Ayman** - Data Modeling & Transformation
+  * **Abdelrahman Khaled** - Analysis & Visualization
+
+-----
+
+*Project developed as part of the Samsung Innovation Campus (SIC) Graduation Program.*
+
+````
+````
+
+وبعدها ادخل على الرابط وشوف العظمة\! 🥳
