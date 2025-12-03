@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: raw_data
+    database: US_ACCIDENTS_DB    # The main database
+    schema: BRONZE               # Source schema (Where raw CSV lives)
+    tables:
+      - name: US_ACCIDENTS_RAW   # The table name in Snowflake

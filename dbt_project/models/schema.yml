@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: dim_location
+    columns:
+      - name: location_key
+        tests:
+          - unique:
+              config:
+                severity: error  
+          - not_null             
+
+  - name: fact_accidents
+    columns:
+      - name: accident_key
+        tests:
+          - unique
+          - not_null
