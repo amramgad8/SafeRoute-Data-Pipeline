@@ -1,292 +1,226 @@
 # 🚦 SafeRoute: US Traffic Accidents Data Pipeline
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge\&logo=python)
-![Snowflake](https://img.shields.io/badge/Snowflake-Data_Warehouse-blue?style=for-the-badge\&logo=snowflake)
-![dbt](https://img.shields.io/badge/dbt-Transformations-orange?style=for-the-badge\&logo=dbt)
-![Dagster](https://img.shields.io/badge/Dagster-Orchestration-purple?style=for-the-badge\&logo=dagster)
-![Airbyte](https://img.shields.io/badge/Airbyte-Ingestion-ff69b4?style=for-the-badge\&logo=airbyte)
-![Power BI](https://img.shields.io/badge/Power_BI-Visualization-F2C811?style=for-the-badge\&logo=powerbi)
+![Snowflake](https://img.shields.io/badge/Snowflake-Computed-blue?style=for-the-badge&logo=snowflake)
+![dbt](https://img.shields.io/badge/dbt-Transformation-orange?style=for-the-badge&logo=dbt)
+![Dagster](https://img.shields.io/badge/Dagster-Orchestration-gray?style=for-the-badge&logo=dagster)
+![Airbyte](https://img.shields.io/badge/Airbyte-Ingestion-purple?style=for-the-badge&logo=airbyte)
+![Power BI](https://img.shields.io/badge/PowerBI-Visualization-F2C811?style=for-the-badge&logo=powerbi)
+
+> **A comprehensive, automated data engineering solution to analyze 7.7 million US traffic accidents (2016–2023), transforming unstructured raw logs into actionable intelligence.**
 
 ---
 
-# 📌 Table of Contents
-
-* [1. Problem](#-problem)
-* [2. Project Objectives](#-project-objectives)
-* [3. Dataset Overview](#-dataset-overview)
-* [4. Architecture](#️-architecture)
-* [5. Tech Stack](#-tech-stack)
-* [6. Engineering & Data Modeling](#-engineering--data-modeling)
-* [7. Optimization & Data Quality](#-optimization--data-quality)
-* [8. Orchestration & Monitoring](#-orchestration--monitoring)
-* [9. Power BI Dashboards](#-power-bi-dashboards)
-* [10. Project Structure](#-project-structure)
-* [11. Quickstart](#-quickstart)
-* [12. Team](#-team)
+## 📌 Table of Contents
+1. [Business Problem & Context](#-business-problem--context)
+2. [Project Objectives](#-project-objectives)
+3. [Dataset Overview](#-dataset-overview)
+4. [Solution Architecture](#-solution-architecture)
+5. [Tech Stack](#-tech-stack)
+6. [Engineering & Data Modeling](#-engineering--data-modeling)
+7. [Optimization, Quality & Testing](#-optimization-quality--testing-highlights)
+8. [Orchestration & Monitoring](#-orchestration--monitoring)
+9. [Dashboards](#-power-bi-dashboards)
+10. [Quickstart](#-quickstart)
+11. [Team](#-team)
 
 ---
 
-# 🔥 Problem
+## 🔥 Business Problem & Context
 
-The United States reports **over 7.7 million accidents** in just 7 years.
-Even though the data is publicly available, it suffers from several issues:
+The United States reports over **7.7 million accidents** in a span of just 7 years. While this data is publicly available, it remains an untapped resource due to its complexity. The core issues we are addressing include:
 
-### **1️⃣ Human Impact**
+### 1️⃣ Human Impact
+Accidents are not just statistics; they represent lives affected. Understanding the patterns behind these incidents is crucial for safety improvements.
 
-Accidents represent lives affected — not just numbers.
+### 2️⃣ Economic Loss
+Traffic delays, damaged infrastructure, and emergency response operations cost the economy billions of dollars annually. Efficient analysis can help mitigate these costs.
 
-### **2️⃣ Economic Loss**
+### 3️⃣ Unstructured & Messy Data
+The raw dataset is "Data Rich, Information Poor." It suffers from significant engineering challenges:
+* **Missing Values:** Large gaps in critical columns.
+* **Inconsistent Data Types:** Mixed formats across years.
+* **Data Silos:** 13 scattered boolean fields making querying difficult.
+* **Lack of Schema:** No clear modeling; weather, time, and location data are mixed without structure.
 
-Traffic delays, damaged infrastructure, and emergency response cost billions yearly.
-
-### **3️⃣ Unstructured & Messy Data**
-
-The dataset includes:
-
-* Missing values
-* Inconsistent data types
-* No clear modeling
-* 13 scattered boolean fields
-* Weather, time, and location inconsistencies
-
-📌 **We have plenty of data, but no clear story behind it.**
+> **Bottom Line:** We have plenty of data, but no clear story behind it. This project bridges that gap.
 
 ---
 
-# 🎯 Project Objectives
+## 🎯 Project Objectives
 
-### **1. Centralize**
+To solve the problems above, this pipeline delivers:
 
-Load all raw accident data into Snowflake Bronze in a unified structure.
-
-### **2. Automate**
-
-Fully automated pipeline using Airbyte, dbt, and Dagster.
-
-### **3. Transform**
-
-Clean, standardize, and model the data into a Star Schema optimized for analytics.
-
-### **4. Visualize**
-
-Produce interactive dashboards for accident patterns, infrastructure risks, and weather impact.
-
-### **5. Monitor**
-
-Detect failures instantly and trigger alert emails for fast response.
+1.  **Centralize:** Ingest all raw accident data into a **Snowflake Bronze Layer** (Raw) in a unified structure.
+2.  **Automate:** Build a fully automated ELT pipeline using **Airbyte** (Ingestion), **dbt** (Transformation), and **Dagster** (Orchestration).
+3.  **Transform:** Clean, standardize, and model the data into a **Star Schema** optimized for high-performance analytics (Gold Layer).
+4.  **Visualize:** Produce interactive dashboards to visualize accident patterns, infrastructure risks, and weather impacts.
+5.  **Monitor:** Implement "Data Observability" to detect failures instantly and trigger **Email Alerts** for immediate response.
 
 ---
 
-# 📊 Dataset Overview
+## 📊 Dataset Overview
 
-A large open dataset of US accidents (2016–2023):
+We are working with a massive open dataset covering the contiguous United States.
 
-### **📌 Size**
+* **Volume:** 7.7 Million+ Records.
+* **Coverage:** 49 States.
+* **Timeline:** Feb 2016 – Mar 2023.
 
-* **7.7M+ records**
-* **49 states**
-* **2016–2023**
-
-### **📌 Main Attributes**
-
-* **Location:** lat/lon, city, county
-* **Time:** start & end timestamps, duration
-* **Weather:** visibility, wind, conditions
-* **Road features:** traffic signal, crossing, junctions
-* **Severity:** level 1 → 4
+### 📌 Key Attributes
+| Category | Details |
+| :--- | :--- |
+| **Location** | Latitude, Longitude, City, County, State, Zipcode. |
+| **Time** | Start/End timestamps, Duration, Timezone. |
+| **Weather** | Visibility (miles), Wind Speed, Precipitation, Weather Condition. |
+| **Road Features** | Traffic Signals, Junctions, Crossings, Roundabouts (Boolean flags). |
+| **Severity** | Scale from 1 (Least impact) to 4 (Significant impact). |
 
 ---
 
-# 🏗️ Architecture
+## 🏗 Solution Architecture
 
-### **Mermaid Pipeline Diagram**
+The system follows a modern **Medallion Architecture** (Bronze $\rightarrow$ Silver $\rightarrow$ Gold).
 
 ```mermaid
 graph LR
-    subgraph "Source & Ingestion"
-        S3[(AWS S3 - Raw CSV Files)] -->|Sync| Airbyte[Airbyte]
-        Airbyte --> SnowBronze[(Snowflake Bronze)]
+    subgraph "Ingestion (EL)"
+        S3[(AWS S3 - Raw CSV)] -->|Sync| Airbyte[Airbyte]
+        Airbyte --> Bronze[(Snowflake Bronze)]
     end
 
-    subgraph "Transformation (dbt)"
-        SnowBronze -->|Clean| SnowSilver[(Snowflake Silver)]
-        SnowSilver -->|Star Schema| SnowGold[(Snowflake Gold)]
+    subgraph "Transformation (T)"
+        Bronze -->|Clean & Cast| Silver[(Snowflake Silver)]
+        Silver -->|Star Schema| Gold[(Snowflake Gold)]
     end
 
-    subgraph "Orchestration (Dagster)"
-        Dagster[Dagster] -->|Run Ingestion| Airbyte
+    subgraph "Orchestration & Control"
+        Dagster[Dagster] -->|Trigger| Airbyte
         Dagster -->|Run Models| dbtCore(dbt Core)
         Dagster -->|Refresh| PowerBI[Power BI]
-        Dagster -->|Email Alert| Email[(Alerting System)]
+        Dagster -.->|Alert| Email[(Email System)]
     end
 
-    PowerBI --> Users((Decision Makers))
-```
+    PowerBI --> DecisionMakers((Stakeholders))
+````
 
-### **Static Architecture**
+-----
 
-![Pipeline](assets/Data_flow_3.png)
+## 🧰 Tech Stack
 
----
+| Component | Technology | Role in Pipeline |
+| :--- | :--- | :--- |
+| **Storage** | **AWS S3** | Object storage for raw CSV files. |
+| **Ingestion** | **Airbyte Cloud** | Managed connector to sync S3 data to Snowflake. |
+| **Warehouse** | **Snowflake** | Cloud Data Warehouse (Separation of Storage & Compute). |
+| **Transformation** | **dbt Core** | SQL-based transformation, testing, and documentation. |
+| **Orchestration** | **Dagster** | Workflow automation, asset management, and alerting. |
+| **Analytics** | **Power BI** | Business Intelligence and Visualization. |
+| **Alerting** | **SMTP** | Automated email notifications for pipeline failures. |
 
-# 🧰 Tech Stack
+-----
 
-| Tool                  | Purpose                                                   |
-| --------------------- | --------------------------------------------------------- |
-| **AWS S3**            | Stores raw CSV accident data                              |
-| **Airbyte Cloud**     | Syncs and loads raw data into Snowflake                   |
-| **Snowflake**         | Data warehouse using Bronze → Silver → Gold layers        |
-| **dbt Core**          | Cleans, transforms, models, and tests the data            |
-| **Dagster**           | Orchestrates the entire pipeline and manages dependencies |
-| **Power BI**          | Final dashboards for analytics                            |
-| **SMTP Email Alerts** | Sends failure/notif alerts from Dagster                   |
+## 🧠 Engineering & Data Modeling
 
----
+### ⭐ Star Schema Implementation
 
-# 🧠 Engineering & Data Modeling
+To ensure fast analytical queries, the Gold layer is modeled using a **Star Schema**:
 
-## ⭐ Star Schema
+  * **Fact Table:** `FACT_ACCIDENTS` (Contains metrics like Duration, Distance, Severity).
+  * **Dimensions:**
+      * `DIM_LOCATION` (Hierarchical: City $\rightarrow$ County $\rightarrow$ State).
+      * `DIM_WEATHER` (Conditions, Temperature, Visibility).
+      * `DIM_TIME` (Date parts, Day/Night).
+      * `DIM_ROAD_CONFIG` (Infrastructure flags).
 
-![Star Schema](assets/Star_Shcema_model.png)
+-----
 
-The Gold layer uses a classic Star Schema to ensure simple, fast analytics:
+## 🔧 Optimization, Quality & Testing (Highlights)
 
-* **FACT_ACCIDENTS** stores measures and keys
-* Dimensions: **Location**, **Weather**, **Time**, **Road Config**, **Date**
+This section details the engineering decisions made to ensure **Performance** and **Trust**.
 
----
+### 1️⃣ Optimization: MD5 Fingerprint Keys
 
-# 🔧 Optimization & Data Quality
+To guarantee **Idempotency** and avoid relying on unstable source IDs:
 
-### **✔️ MD5 Fingerprint Key**
+  * I generated a surrogate key using an **MD5 Hash** of critical fields:
+    `MD5(Start_Time + Latitude + Longitude + Description)`
+  * **Benefit:** Prevents duplicates during incremental loads and ensures a consistent Primary Key across all layers.
 
-To guarantee each accident is uniquely identified, I generated an MD5 hash based on critical fields such as:
-`Start_Time + Latitude + Longitude + Description`
+### 2️⃣ Optimization: Snowflake Clustering
 
-This prevents duplicate loading and ensures stable primary keys across layers.
+Querying 7.7M records by specific geographies was initially slow.
 
----
+  * **Solution:** Applied Snowflake **Automatic Clustering** on `FACT_ACCIDENTS`.
+  * **Cluster Keys:** `Start_Date`, `State`, `GeoPoint`.
+  * **Result:** Enabled **Partition Pruning**, drastically reducing the number of micro-partitions scanned for geospatial queries.
 
-### **✔️ Clustering in Snowflake**
+### 3️⃣ Data Quality: dbt Testing
 
-To speed up geospatial and time-based queries:
+We don't just load data; we test it.
 
-* Clustered **FACT_ACCIDENTS** by:
+  * **Generic Tests:** `unique`, `not_null` on all Primary Keys.
+  * **Logic Tests:** Enforcing business logic, e.g., checking that `End_Time > Start_Time`.
+  * **Staging Logic:** Robust type casting (`TRY_TO_DOUBLE`) and Null handling (`COALESCE`).
 
-  * `Start_Date`
-  * `State`
-  * `GeoPoint`
+-----
 
-Result:
-Much faster filtering by state, date, and map layers, especially for dashboards.
+## ⚙ Orchestration & Monitoring
 
----
+**Dagster** acts as the central brain of the operation, managing dependencies between Airbyte, dbt, and Power BI.
 
-### **✔️ dbt Testing**
+### 🚨 Email Alerting System
 
-Included:
+We implemented a robust failure detection system. If *any* step in the pipeline fails (Ingestion or Transformation):
 
-* Unique tests
-* Non-null tests
-* Relationship integrity
-* Custom tests like checking:
-  `End_Time > Start_Time`
+1.  Dagster Sensor detects the failure event.
+2.  SMTP server triggers an immediate **Email Alert** to the engineering team.
+3.  Ensures high availability and quick MTTR (Mean Time To Recovery).
 
----
+> **[Insert Screenshot of Email Alert Here]**
 
-### **✔️ Robust Staging**
+-----
 
-* Type casting using `TRY_TO_*`
-* Null handling via `COALESCE()`
-* Derived fields (part_of_day, duration, visibility category)
+## 📈 Power BI Dashboards
 
----
+The final output empowers stakeholders with:
 
-# ⚙️ Orchestration & Monitoring
+1.  **General Overview:** High-level KPIs (Total Accidents, Avg Severity).
+2.  **Weather Impact:** Visualizing how rain/snow affects accident frequency.
+3.  **Road Infrastructure:** Identifying dangerous junctions and crossings.
 
-### **Dagster manages the entire ELT workflow**
+-----
 
-* Runs Airbyte sync
-* Runs dbt models
-* Refreshes Power BI
-* Sends alerts if any step fails
-
-### **Email Alert (Failure Notification)**
-
-![Dagster Email Alert](assets/dagster_alert_email.jpg)
-
-### **Run Example**
-
-![Dagster Execution](assets/trigger_powerbi_refresh.png)
-
----
-
-# 📈 Power BI Dashboards
-
-## **1️⃣ General Overview**
-
-![General Dashboard](assets/General_Statistics_dashboard.png)
-
----
-
-## **2️⃣ Weather Impact**
-
-![Weather Dashboard](assets/Weather_Statistics_dashboard.png)
-
----
-
-## **3️⃣ Road Infrastructure Statistics**
-
-![Road Stats](assets/Road_Statistics_dashboard.png)
-
----
-
-# 📂 Project Structure
-
-```
-SafeRoute-Data-Pipeline/
-│── assets/
-│── dbt_project/
-│── orchestration/
-│── README.md
-```
-
----
-
-# 🚀 Quickstart
+## 🚀 Quickstart
 
 ```bash
-# Clone the repository
-git clone https://github.com/amramgad8/SafeRoute-Data-Pipeline.git
+# 1. Clone the repository
+git clone [https://github.com/amramgad8/SafeRoute-Data-Pipeline.git](https://github.com/amramgad8/SafeRoute-Data-Pipeline.git)
 cd SafeRoute-Data-Pipeline
 
-# Install dependencies
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# Run dbt
+# 3. Setup dbt
 cd dbt_project
-dbt run
-dbt test
+dbt deps
+dbt build
 
-# Start Dagster
-cd ..
+# 4. Launch Dagster
+cd ../orchestration
 dagster dev
 ```
 
----
+-----
 
-# 👥 Team
+## 👥 Team
 
-* **Amr Amgad** — Data Engineering & Cloud
-* **Mark Ayman** — Data Modeling
-* **Abdelrahman Khaled** — Analytics & Visualization
+  * **Amr Amgad** – Data Engineering & Cloud Architecture
+  * **Mark Ayman** – Data Modeling
+  * **Abdelrahman Khaled** – Analytics & Visualization
 
----
+-----
 
-# 🎉 Final Note
+**SafeRoute** delivers a production-grade modern data pipeline—fully automated, tested, and optimized for performance.
+*If you find this project useful, feel free to ⭐ the repo\!*
 
-SafeRoute delivers a **production-grade modern data pipeline** integrating ingestion, transformation, orchestration, and analytics — fully automated and optimized for performance.
-
-If you found this project useful, feel free to ⭐ the repo!
-
----
+```
