@@ -68,7 +68,7 @@ The dataset suffers from:
 **Volume:** 7,700,000+ accident records
 **Coverage:** 49 states
 **Timeline:** 2016–2023
-
+Source: [US Accidents Dataset on Kaggle](https://www.kaggle.com/datasets/sobhanmoosavi/us-accidents)
 ### 📌 Key Attributes
 
 | Category          | Description                                                            |
