@@ -200,7 +200,9 @@ Dagster runs and monitors the entire pipeline.
 
 ### **✔️ Triggering Power BI Refresh**
 
-![Dagster Trigger](assets/trigger_powerbi_refresh.png)
+<p align="left">
+  <img src="assets/trigger_powerbi_refresh.png" width="420">
+</p>
 
 ---
 
