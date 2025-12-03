@@ -208,7 +208,10 @@ Dagster runs and monitors the entire pipeline.
 
 If any step fails, Dagster instantly sends an automatic email.
 
-![Email Alert](assets/dagster_alert_email.jpg)
+<p align="left">
+  <img src="assets/dagster_alert_email.jpg" width="400">
+</p>
+
 
 ---
 
