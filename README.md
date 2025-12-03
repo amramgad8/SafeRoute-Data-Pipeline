@@ -89,24 +89,74 @@ The pipeline follows the **Medallion Architecture** (Bronze → Silver → Gold)
 
 ```mermaid
 graph LR
-    subgraph "Ingestion (EL)"
-        S3[(AWS S3 - Raw CSV)] -->|Sync| Airbyte[Airbyte]
-        Airbyte --> Bronze[(Snowflake Bronze)]
+    %% =========================
+    %% NODES & SUBGRAPHS
+    %% =========================
+    subgraph Source
+        S3[(AWS S3\nRaw Files)]
     end
 
-    subgraph "Transformation (T)"
-        Bronze -->|Clean & Cast| Silver[(Snowflake Silver)]
-        Silver -->|Star Schema| Gold[(Snowflake Gold)]
+    subgraph "Ingestion (EL)"
+        Airbyte[Airbyte\nCloud]
+    end
+
+    subgraph "Snowflake DWH\n(Medallion)"
+        Bronze[(Bronze\nRaw)]
+        Silver[(Silver\nClean)]
+        Gold[(Gold\nStar Schema)]
+    end
+
+    subgraph "BI & Consumers"
+        PowerBI[Power BI\nDashboards]
+        DecisionMakers((Stakeholders))
     end
 
     subgraph "Orchestration & Control"
-        Dagster[Dagster] -->|Trigger| Airbyte
-        Dagster -->|Run Models| dbtCore(dbt Core)
-        Dagster -->|Refresh| PowerBI[Power BI]
-        Dagster -.->|Alert| Email[(Email System)]
+        Dagster[Dagster]
+        dbtCore[dbt Core]
+        Email[(Email / Alerts)]
     end
 
-    PowerBI --> DecisionMakers((Stakeholders))
+    %% =========================
+    %% DATA FLOW (EL + DWH + BI)
+    %% =========================
+    S3 -->|Sync EL| Airbyte
+    Airbyte -->|Load| Bronze
+    Bronze -->|Clean & Cast| Silver
+    Silver -->|Star Schema| Gold
+    Gold -->|Publish Models| PowerBI
+    PowerBI -->|Insights| DecisionMakers
+
+    %% =========================
+    %% ORCHESTRATION / CONTROL
+    %% =========================
+    Dagster -->|Trigger EL| Airbyte
+    Dagster -->|Run Models| dbtCore
+    Dagster -->|Refresh Dashboards| PowerBI
+    Dagster -.->|Alert on Failure| Email
+
+    %% dbt يتحكم في التحويلات بين الطبقات
+    dbtCore -.Transforms.-> Bronze
+    dbtCore -.Transforms.-> Silver
+    dbtCore -.Transforms.-> Gold
+
+    %% =========================
+    %% STYLES
+    %% =========================
+    classDef source       fill:#FFE0B2,stroke:#EF6C00,stroke-width:2px,color:#000;
+    classDef ingestion    fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#000;
+    classDef dwh          fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#000;
+    classDef bi           fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#000;
+    classDef orchestration fill:#EDE7F6,stroke:#5E35B1,stroke-width:2px,color:#000;
+    classDef external     fill:#F3E5F5,stroke:#6A1B9A,stroke-dasharray:3 3,color:#000;
+
+    class S3 source;
+    class Airbyte ingestion;
+    class Bronze,Silver,Gold dwh;
+    class PowerBI,DecisionMakers bi;
+    class Dagster,dbtCore orchestration;
+    class Email external;
+
 ```
 
 ### **Static Architecture**
